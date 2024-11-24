@@ -1,47 +1,33 @@
-lassomodel <- function(DV, predictors, train){
-  data <- cbind(DV,predictors)
+lassomodel <- function(DV, predictors){
+  data <- cbind(DV, predictors)
   data <- na.omit(data)
   
-  if (train){
-    training.samples <-
-      createDataPartition(data$DV,
-                          p=0.9,
-                          list=FALSE)
-    train.data <- data[training.samples,]
-    test.data <- data[-training.samples,]
-    
-    y <- train.data$DV
-    x <- model.matrix(DV~., train.data)[,-1]
-  }  else{
-    y <- data$DV
-    x <- model.matrix(DV~., data)[,-1]
-  }
+  y <- data$DV
+  x <- model.matrix(DV ~ . - 1, data = data) # Remove intercept to fit LASSO
+  x <- model.matrix(DV ~ ., data = data) # Remove intercept to fit LASSO
   
-  # LASSO (for elastic Net alpha=0.5, for ridge alpha=0)
+  # Cross-validated LASSO model
   cv.lasso <- cv.glmnet(x, y, alpha = 1, nfolds = 10)
-  lasso.model <- glmnet(x, y, alpha = 1,
-                        lambda = cv.lasso$lambda.min)
-  lasso.coefs <- coef(lasso.model)
   
+  # Fit final LASSO model using the lambda that minimized the cross-validation error
+  lasso.model <- glmnet(x, y, alpha = 1, lambda = cv.lasso$lambda.min)
+  
+  # Extract coefficients
+  lasso.coefs <- coef(lasso.model)
   DV_lasso <- data.frame(
     predictor = row.names(lasso.coefs)[-1],
-    coefficient = lasso.coefs[-1])
+    coefficient = as.numeric(lasso.coefs[-1])
+  )
   DV_lasso <- DV_lasso[DV_lasso$coefficient != 0, ]
   
-  if (train){
-    # Make prediction on test data
-    x.test_lasso <- model.matrix(DV ~., test.data)[,-1]
-    predictions_lasso <- as.vector(predict(lasso.model, newx = x.test_lasso))
-    
-    # Model performance metrics
-    RMSE_lasso = RMSE(predictions_lasso, test.data$DV)
-    Rsquare_lasso = R2(predictions_lasso, test.data$DV)
-    result <- list(DV_lasso=DV_lasso,
-                   RMSE_lasso=RMSE_lasso,
-                   Rsquare_lasso=Rsquare_lasso)
-  } else{
-    result <- list(DV_lasso=DV_lasso)
-  }
+  # Prepare result output
+  result <- list(
+    DV_lasso = DV_lasso,
+    lambda_min = cv.lasso$lambda.min,
+    cvm = min(cv.lasso$cvm), # Minimum mean cross-validated error
+    cvsd = cv.lasso$cvsd[which.min(cv.lasso$cvm)] # Standard deviation of errors at min
+  )
+  
   return(result)
 }
 
@@ -69,7 +55,7 @@ regressionmodel <- function(DV, predictor1, predictor2 = NULL){
   BIC1 <- BIC(lm1$finalModel)
   
   if (!is.null(predictor2)){
-    # Fit linear regression with two predictor
+    # Fit linear regression with two predictors
     lm2 <- train(DV ~ predictor1 + predictor2, data = data,
                  method = "lm", trControl = ctrl)
     
@@ -93,9 +79,8 @@ regressionmodel <- function(DV, predictor1, predictor2 = NULL){
 }
 
 nestedmodels <- function(df, metrics, outcome){
-  
-  # metrics <- rep(metrics,2)
-  
+  library(lmtest)
+  library(ggpubr)
   # Create an empty data frame to store the results
   results_df <- data.frame(result = numeric(length = length(metrics)),
                            metric = metrics)
@@ -105,7 +90,7 @@ nestedmodels <- function(df, metrics, outcome){
     metric <- metrics[i]
     
     # Apply your function to the current metric and outcome
-    result <- regressionmodel(df[[outcome]],df$P2Nr,df[[metric]])
+    result <- regressionmodel(df[[outcome]],df$P2N_ASR,df[[metric]])
     # result <- round(result$allRsq1,2)
     result <- round(result$pval,3)
     
@@ -149,4 +134,86 @@ relativeImportance <- function(DV, metrics){
   # return(list(rel_imp = rel_imp, bootresults = bootresults,
   #             ci = ci))
   return(rel_imp)
+}
+
+identify_exclusions <- function(df, pid_col, val_col, duration_threshold) {
+  
+  # Initialize a vector to store the PIDs that meet the exclusion criteria
+  exclusions <- c()
+  
+  # Unique participant IDs
+  unique_pids <- unique(df[[pid_col]])
+  
+  # Loop over each unique participant
+  for(pid in unique_pids) {
+    # Subset data for the participant
+    participant_data <- df[df[[pid_col]] == pid, ]
+    
+    # Initialize the flatline length counter
+    flatline_length <- 0
+    
+    # Loop over the valence values
+    for(i in seq_along(participant_data[[val_col]])) {
+      # Check if the current value is -50, 0, 50, or NA
+      if(is.na(participant_data[[val_col]][i]) || participant_data[[val_col]][i] %in% c(-50, 0, 50)) {
+        # Increment the flatline counter
+        flatline_length <- flatline_length + 1
+      } else {
+        # Reset the flatline counter if the current value is not -50, 0, 50, or NA
+        flatline_length <- 0
+      }
+      
+      # Check if the flatline length meets the threshold
+      if(flatline_length >= duration_threshold) {
+        exclusions <- c(exclusions, pid)
+        break # Exit the loop for this participant since they met the exclusion criterion
+      }
+    }
+  }
+  
+  # Return the list of participants to exclude
+  return(unique(exclusions))
+}
+
+# Function to calculate reliability and produce comparison
+calculate_reliability <- function(dfa, dfb, variable_name) {
+  # Merge dataframes by 'PID'
+  params_combined <- merge(dfa[, c("PID", variable_name)], dfb[, c("PID", variable_name)],
+                           by = "PID", suffixes = c(".half1", ".half2"), all = FALSE)
+  
+  # Correctly construct column names for filtering complete cases
+  col_name_half1 <- paste(variable_name, ".half1", sep="")
+  col_name_half2 <- paste(variable_name, ".half2", sep="")
+  
+  # Filter out rows where either half has NA for the given parameter
+  complete_cases <- complete.cases(params_combined[, c(col_name_half1, col_name_half2)])
+  params_filtered <- params_combined[complete_cases, ]
+  
+  # Calculate correlation and p-value if there are complete cases
+  if (nrow(params_filtered) > 0) {
+    test_results <- cor.test(params_filtered[[col_name_half1]], params_filtered[[col_name_half2]], 
+                             method = "pearson", use = "complete.obs")
+    correlation <- test_results$estimate
+    p_value <- test_results$p.value
+  } else {
+    correlation <- NA  # Return NA if no complete cases
+    p_value <- NA
+  }
+  
+  # Optionally: Generate a plot to visualize the correlations
+  if (nrow(params_filtered) > 0) {
+    plot(params_filtered[[col_name_half1]], params_filtered[[col_name_half2]],
+         main = paste("Correlation between halves for", variable_name),
+         xlab = "First Half", ylab = "Second Half", pch = 19)
+    abline(lm(params_filtered[[col_name_half2]] ~ params_filtered[[col_name_half1]]), col = "blue")
+  }
+  
+  return(list(correlation=correlation, p_value=p_value))
+}
+
+# Function to calculate Mixed Emotions Index
+calculate_mixed_emotions_index <- function(valence_data, range = c(-10, 10)) {
+  valence_data <- valence_data[!is.na(valence_data)] # Remove NA values
+  within_range <- valence_data >= range[1] & valence_data <= range[2]
+  return(sum(within_range) / length(valence_data))
 }

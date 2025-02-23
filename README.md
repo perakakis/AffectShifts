@@ -1,1 +1,5 @@
-# Code and Data for Bistability and Affect Shift Dynamics in the Prediction of Psychological Well-Being
+## Code and Data for Bistability and Affect Shift Dynamics in the Prediction of Psychological Well-Being
+CITATION
+Goicoechea, C., Dakos, V., Sanabria, D., Heshmati, S., Westhoff, M., Banos, O., Pomares, H., Hofmann, S.
+G., & Perakakis, P. (2024). Bistability and affect shift dynamics in the prediction of psychological well-
+being. Emotion. Advance online publication. https://dx.doi.org/10.1037/emo0001454

@@ -4,7 +4,6 @@ lassomodel <- function(DV, predictors){
   
   y <- data$DV
   x <- model.matrix(DV ~ . - 1, data = data) # Remove intercept to fit LASSO
-  x <- model.matrix(DV ~ ., data = data) # Remove intercept to fit LASSO
   
   # Cross-validated LASSO model
   cv.lasso <- cv.glmnet(x, y, alpha = 1, nfolds = 10)

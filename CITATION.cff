@@ -1,0 +1,73 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite both the software and the associated paper."
+type: software
+title: "AffectShifts"
+abstract: "Code and data for the analysis of bistability and affect shift dynamics in the prediction of psychological well-being."
+authors:
+  - family-names: Perakakis
+    given-names: Pandelis
+    orcid: https://orcid.org/0000-0002-9130-3247
+    affiliation: "Department of Social, Work and Differential Psychology, Complutense University of Madrid"
+  - family-names: Goicoechea
+    given-names: Carmen
+    affiliation: "Mind, Brain, and Behavior Research Center, University of Granada"
+  - family-names: Dakos
+    given-names: Vasilis
+    affiliation: "Institut des Sciences de l'Evolution de Montpellier, Université de Montpellier"
+  - family-names: Sanabria
+    given-names: Daniel
+    affiliation: "Mind, Brain, and Behavior Research Center, University of Granada"
+  - family-names: Heshmati
+    given-names: Saida
+    affiliation: "Department of Psychology, Claremont Graduate University"
+  - family-names: Westhoff
+    given-names: Marlon
+    affiliation: "Department of Psychology, Philipps-University of Marburg"
+  - family-names: Banos
+    given-names: Oresti
+    affiliation: "Research Center for Information and Communication Technologies, University of Granada"
+  - family-names: Pomares
+    given-names: Hector
+    affiliation: "Research Center for Information and Communication Technologies, University of Granada"
+  - family-names: Hofmann
+    given-names: Stefan G.
+    affiliation: "Department of Psychology, Philipps-University of Marburg"
+repository-code: "https://github.com/perakakis/AffectShifts"
+license: MIT
+doi: 10.5281/zenodo.15001651
+keywords:
+  - affect dynamics
+  - bistability
+  - psychological well-being
+  - ecological momentary assessment
+  - affect shifts
+preferred-citation:
+  type: article
+  title: "Bistability and affect shift dynamics in the prediction of psychological well-being"
+  authors:
+    - family-names: Goicoechea
+      given-names: Carmen
+    - family-names: Dakos
+      given-names: Vasilis
+    - family-names: Sanabria
+      given-names: Daniel
+    - family-names: Heshmati
+      given-names: Saida
+    - family-names: Westhoff
+      given-names: Marlon
+    - family-names: Banos
+      given-names: Oresti
+    - family-names: Pomares
+      given-names: Hector
+    - family-names: Hofmann
+      given-names: Stefan G.
+    - family-names: Perakakis
+      given-names: Pandelis
+      orcid: https://orcid.org/0000-0002-9130-3247
+  journal: "Emotion"
+  volume: 25
+  issue: 4
+  start: 982
+  end: 996
+  year: 2025
+  doi: 10.1037/emo0001454

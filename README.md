@@ -4,7 +4,8 @@
 
 Goicoechea, C., Dakos, V., Sanabria, D., Heshmati, S., Westhoff, M., Banos, O., Pomares, H., Hofmann, S. G., & Perakakis, P. (2024). Bistability and affect shift dynamics in the prediction of psychological well-being. Emotion, 25(4), 982–996. https://dx.doi.org/10.1037/emo0001454
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15001651.svg)](https://doi.org/10.5281/zenodo.15001651)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19414987.svg)](https://doi.org/10.5281/zenodo.19414987)
+
 
 ### Repository Structure
 

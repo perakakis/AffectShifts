@@ -41,9 +41,10 @@ for (i in 1:length(rows)) {
   lres[i, res$DV_lasso$predictor] <- res$DV_lasso$coefficient  # Store coefficients in result table
 }
 
-# Handle 'Type' column separately
-lres$Type <- lres$Type1
-lres <- lres[, -ncol(lres)]  # Remove the last column (Type1 placeholder)
+# Handle 'Type' dummy columns: model.matrix creates Type0 and Type1
+if ("Type1" %in% colnames(lres)) lres$Type <- lres$Type1
+if ("Type0" %in% colnames(lres)) lres$Type0 <- NULL
+if ("Type1" %in% colnames(lres)) lres$Type1 <- NULL
 
 ## Study 2 ####
 # Subset the data for Study 2 and keep the first row per participant
@@ -72,9 +73,10 @@ for (i in 1:length(rows)) {
   lres2[i, res$DV_lasso$predictor] <- res$DV_lasso$coefficient  # Store coefficients
 }
 
-# Handle 'Type' column separately for Study 2
-lres2$Type <- lres2$Type1
-lres2 <- lres2[, -ncol(lres2)]  # Remove the last column (Type1 placeholder)
+# Handle 'Type' dummy columns for Study 2
+if ("Type1" %in% colnames(lres2)) lres2$Type <- lres2$Type1
+if ("Type0" %in% colnames(lres2)) lres2$Type0 <- NULL
+if ("Type1" %in% colnames(lres2)) lres2$Type1 <- NULL
 
 # Transpose and round results for both studies
 lres1 <- t(round(lres, 2))  # Transpose and round results for Study 1
@@ -84,14 +86,6 @@ lres2 <- t(round(lres2, 2))  # Transpose and round results for Study 2
 lres <- cbind(lres1, lres2)
 rownames(lres)[2:3] <- c("P2N-ASR", "N2P-ASR")  # Rename rows for clarity
 rownames(lres)[8:11] <- c("mP2N-ASM", "sdP2N-ASM", "mN2P-ASM", "sdN2P-ASM")
-
-# Create and save LASSO table (if needed)
-source("./code/table_lasso.R")
-# Uncomment below to save results as a table:
-# gtsave(tbl, "./tables/table_lasso.html")
-# gtsave(tbl, file = "./tables/table_lasso.pdf")
-# gtsave(tbl, file = "./tables/table_lasso.png")
-# gtsave(tbl, file = "./tables/table_lasso.docx")
 
 # Visualization: Create a data frame for plotting
 data <- data.frame(t(lres))  # Convert results to a data frame

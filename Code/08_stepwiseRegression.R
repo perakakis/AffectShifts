@@ -69,14 +69,6 @@ rownames(lres)[5] <- "P2N-ASR"  # Rename row for clarity
 # Optional: Save the results to a CSV file
 # write.csv(lres, file = "./tables/stepwiseData.csv")
 
-# Create and save Stepwise regression table (optional)
-source("./code/table_stepwise.R")
-# Uncomment the lines below to save the table in different formats:
-# gtsave(tbl, "./tables/table_stepwise.html")
-# gtsave(tbl, file = "./tables/table_stepwise.pdf")
-# gtsave(tbl, file = "./tables/table_stepwise.png")
-# gtsave(tbl, file = "./tables/table_stepwise.docx")
-
 # Visualization: Create a data frame for plotting
 data <- data.frame(t(lres))  # Convert results to a data frame
 colnames(data)[5] <- "P2N-ASR"  # Rename column for clarity

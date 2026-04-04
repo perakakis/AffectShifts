@@ -41,16 +41,15 @@ for (i in seq(1, length(PIDs))) {
   basins <- earlywarnings::livpotential_ews(y3)
   
   # Identify local minima (valleys) in the potential function
-  lm <- photobiology::get_valleys(
-    basins$grid.points, basins$pot, 
-    ignore_threshold = -0.2, 
+  valley_idx <- photobiology::find_valleys(
+    basins$pot,
     strict = TRUE, 
     span = 3
   )
   
-  # Extract indices of local minima (valleys)
-  basinsind <- which(basins$grid.points %in% lm$x)
-  basinlocs <- lm$x  # Coordinates of basin locations
+  # Extract indices and coordinates of local minima (valleys)
+  basinsind <- which(valley_idx)
+  basinlocs <- basins$grid.points[valley_idx]
   
   # Check if exactly one local minimum exists in the range [-5, 5]
   values_in_range <- sum(basinlocs >= -5 & basinlocs <= 5)

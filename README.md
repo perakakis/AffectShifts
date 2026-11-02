@@ -35,3 +35,7 @@ renv::restore()
 This will install all required packages at the exact versions recorded in `renv.lock` (R 4.5.2).
 
 Scripts are intended to be run from the project root directory.
+
+### License
+
+The code is released under the MIT licence (`LICENSE`). The data are released under CC BY 4.0 (`Data/LICENSE.md`).
